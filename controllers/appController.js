@@ -169,3 +169,21 @@ export const verifyOTPCtrl = asyncHandler(async (request, response) => {
     throw error;
   }
 });
+
+// TODO: successfully redirect user when OTP is valid
+/*
+GET: http://localhost:8080/api/create-reset-session
+*/
+export const createResetSessionCtrl = asyncHandler(
+  async (request, response) => {
+    if (request.app.locals.resetSession) {
+      return response
+        .status(201)
+        .send({ flag: request.app.locals.resetSession });
+    } else {
+      const error = new Error("Session expired!");
+      error.statusCode = 440;
+      throw error;
+    }
+  }
+);
