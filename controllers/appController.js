@@ -52,3 +52,33 @@ export const registerCtrl = asyncHandler(async (request, response) => {
     // data: user,
   });
 });
+
+/*
+POST: http://localhost:8049/api/login
+@param: {
+  "username" : "example123",
+  "password" : "admin123"
+}
+*/
+export const loginCtrl = asyncHandler(async (request, response) => {
+  const { username, password } = request.body;
+
+  const userFound = request?.userFound;
+
+  if (userFound && (await bcrypt.compare(password, userFound?.password))) {
+    response.json({
+      status: "success",
+      message: "User LoggedIn Successfully",
+      // userFound,
+      userFound: {
+        username: userFound?.username,
+      },
+      // generate jwt token
+      token: generateToken(userFound?._id),
+    });
+  } else {
+    const error = new Error("Invalid Login Credentials");
+    error.statusCode = 404;
+    throw error;
+  }
+});
