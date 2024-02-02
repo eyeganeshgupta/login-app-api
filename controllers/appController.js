@@ -82,3 +82,31 @@ export const loginCtrl = asyncHandler(async (request, response) => {
     throw error;
   }
 });
+
+/*
+GET: http://localhost:8049/api/user/example123
+*/
+export const getUserCtrl = asyncHandler(async (request, response) => {
+  const { username } = request.params;
+
+  if (!username) {
+    throw new Error("Invalid Username");
+  }
+
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    const error = new Error("Couldn't find the user");
+    error.statusCode = 404;
+    throw error;
+  } else {
+    // ! remove password from user
+    // ! mongoose return unnecessary data with object so convert it into json
+    const { password, ...rest } = Object.assign({}, user.toJSON());
+    response.status(201).send({
+      status: "success",
+      message: "User data fetched successfully",
+      data: rest,
+    });
+  }
+});
