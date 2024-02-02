@@ -110,3 +110,32 @@ export const getUserCtrl = asyncHandler(async (request, response) => {
     });
   }
 });
+
+/*
+PUT: http://localhost:8049/api/update-user
+@param: {
+  "header" : "<token>"
+}
+body: {
+    firstName: '',
+    address : '',
+    profile : ''
+}
+*/
+export const updateUserCtrl = asyncHandler(async (request, response) => {
+  const id = request.userAuthId;
+
+  const body = request.body;
+
+  const user = await User.findByIdAndUpdate(id, body, { new: true });
+
+  if (user) {
+    response.json({
+      status: "success",
+      message: "User updated successfully",
+      user,
+    });
+  } else {
+    throw new Error("User not found!");
+  }
+});
