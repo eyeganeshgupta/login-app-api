@@ -139,3 +139,33 @@ export const updateUserCtrl = asyncHandler(async (request, response) => {
     throw new Error("User not found!");
   }
 });
+
+/*
+GET: http://localhost:8080/api/generate-otp
+*/
+export const generateOTPCtrl = asyncHandler(async (request, response) => {
+  request.app.locals.OTP = await otpGenerator.generate(6, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+  response.status(201).send({ code: request.app.locals.OTP });
+});
+
+/*
+GET: http://localhost:8080/api/verify-otp
+*/
+export const verifyOTPCtrl = asyncHandler(async (request, response) => {
+  const { otp } = request.query;
+  if (parseInt(request.app.locals.OTP) === parseInt(otp)) {
+    // TODO: Reset the OTP value
+    request.app.locals.OTP = null;
+    // TODO: Start session for reset password
+    request.app.locals.resetSession = true;
+    return response.status(201).send({ message: "Verified Successfully!" });
+  } else {
+    const error = new Error("Invalid OTP");
+    error.statusCode = 400;
+    throw error;
+  }
+});
