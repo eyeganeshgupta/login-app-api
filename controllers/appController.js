@@ -187,3 +187,39 @@ export const createResetSessionCtrl = asyncHandler(
     }
   }
 );
+
+// TODO: update the password when we have valid session
+/*
+PUT: http://localhost:8080/api/reset-password
+*/
+export const resetPasswordCtrl = asyncHandler(async (request, response) => {
+  if (!request.app.locals.resetSession) {
+    return response.status(440).send({ message: "Session expired!" });
+  }
+
+  const { username, password } = request.body;
+
+  const userFound = await User.findOne({ username });
+
+  if (userFound) {
+    // ! hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const result = await User.updateOne(
+      { username: userFound.username },
+      { password: hashedPassword }
+    );
+
+    if (result.modifiedCount === 0) {
+      const error = new Error("Record not found!");
+      error.statusCode = 440;
+      throw error;
+    }
+
+    // ! Reset session
+    request.app.locals.resetSession = false;
+
+    return response.status(201).send({ message: "Password updated!" });
+  }
+});
